@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Kısaltma Servisi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-down': 'slideDown 0.3s ease-out',
+                        'pulse-once': 'pulse 0.6s ease-in-out',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 transition-colors duration-300">
+    <div class="fixed top-4 right-4 z-10">
+        <button id="themeToggle" class="p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200 dark:border-gray-700">
+            <svg id="sunIcon" class="w-6 h-6 text-yellow-500 dark:hidden" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" clip-rule="evenodd"></path>
+            </svg>
+            <svg id="moonIcon" class="w-6 h-6 text-blue-400 hidden dark:block" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+            </svg>
+        </button>
+    </div>
+
+    <div class="container mx-auto px-4 py-8 max-w-2xl">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl overflow-hidden animate-fade-in">
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-700 p-8 text-center">
+                <h1 class="text-4xl font-bold text-white mb-2 flex items-center justify-center gap-3">
+                    🔗 URL Kısaltma Servisi
+                </h1>
+                <p class="text-blue-100 dark:text-blue-200">Uzun URL'lerinizi kolayca kısaltın ve paylaşın</p>
+            </div>
+
+            <div class="p-8">
+                <form id="urlForm" class="space-y-6">
+                    <div class="space-y-2">
+                        <label for="originalUrl" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                            Kısaltmak istediğiniz URL:
+                        </label>
+                        <div class="relative">
+                            <input 
+                                type="url" 
+                                id="originalUrl" 
+                                placeholder="https://example.com/very/long/url" 
+                                required
+                                class="w-full px-4 py-3 pr-12 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white transition-all duration-200 text-lg"
+                            >
+                            <div class="absolute inset-y-0 right-0 flex items-center pr-3">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    <button 
+                        type="submit" 
+                        id="submitBtn"
+                        class="w-full bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-[1.02] hover:shadow-lg flex items-center justify-center gap-2"
+                    >
+                        <span id="submitText">🚀 Kısalt</span>
+                        <svg id="loadingIcon" class="hidden w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                    </button>
+                </form>
+                
+                <div id="result" class="hidden mt-8 p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg animate-slide-down">
+                    <h3 class="text-lg font-semibold text-green-800 dark:text-green-400 mb-4 flex items-center gap-2">
+                        ✅ Kısaltılmış URL Hazır!
+                    </h3>
+                    
+                    <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-4">
+                        <div class="flex items-center justify-between gap-4">
+                            <a 
+                                id="shortUrlLink" 
+                                href="#" 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                class="flex-1 text-blue-600 dark:text-blue-400 font-mono text-lg hover:text-blue-800 dark:hover:text-blue-300 transition-colors duration-200 break-all"
+                            ></a>
+                            <div class="flex gap-2">
+                                <button 
+                                    id="copyBtn"
+                                    class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-all duration-200 flex items-center gap-2 hover:scale-105"
+                                    title="URL'i kopyala"
+                                >
+                                    <svg id="copyIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                    <span id="copyText">Kopyala</span>
+                                </button>
+                                
+                                <button 
+                                    id="openBtn"
+                                    class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-all duration-200 flex items-center gap-2 hover:scale-105"
+                                    title="Yeni sekmede aç"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                    </svg>
+                                    Aç
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p class="text-sm text-green-700 dark:text-green-400 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        Bu URL'i artık istediğiniz herhangi bir yerde paylaşabilirsiniz!
+                    </p>
+                </div>
+
+                <div id="error" class="hidden mt-8 p-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg animate-slide-down">
+                    <h3 class="text-lg font-semibold text-red-800 dark:text-red-400 mb-2 flex items-center gap-2">
+                        ❌ Bir Hata Oluştu
+                    </h3>
+                    <p id="errorMessage" class="text-red-700 dark:text-red-300"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-8 text-gray-600 dark:text-gray-400">
+            <p class="text-sm">
+                Made with ❤️ using Go & Tailwind CSS by <a href="https://github.com/StacheNoisy" class="text-blue-600 dark:text-blue-400 hover:underline">StacheNoisy</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        const currentTheme = localStorage.getItem('theme') || 
+            (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        
+        if (currentTheme === 'dark') {
+            html.classList.add('dark');
+        }
+
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            const newTheme = html.classList.contains('dark') ? 'dark' : 'light';
+            localStorage.setItem('theme', newTheme);
+        });
+
+        const urlForm = document.getElementById('urlForm');
+        const originalUrlInput = document.getElementById('originalUrl');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const loadingIcon = document.getElementById('loadingIcon');
+        const resultDiv = document.getElementById('result');
+        const errorDiv = document.getElementById('error');
+        const shortUrlLink = document.getElementById('shortUrlLink');
+        const copyBtn = document.getElementById('copyBtn');
+        const copyText = document.getElementById('copyText');
+        const copyIcon = document.getElementById('copyIcon');
+        const openBtn = document.getElementById('openBtn');
+        const errorMessage = document.getElementById('errorMessage');
+
+        urlForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const originalUrl = originalUrlInput.value.trim();
+            
+            submitBtn.disabled = true;
+            submitText.textContent = 'Kısaltılıyor...';
+            loadingIcon.classList.remove('hidden');
+            resultDiv.classList.add('hidden');
+            errorDiv.classList.add('hidden');
+            
+            try {
+                const response = await fetch('/shorten', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: originalUrl })
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    showResult(data.short_url);
+                } else {
+                    const errorText = await response.text();
+                    showError('Sunucu hatası: ' + errorText);
+                }
+            } catch (error) {
+                showError('Bağlantı hatası: ' + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitText.textContent = '🚀 Kısalt';
+                loadingIcon.classList.add('hidden');
+            }
+        });
+
+        function showResult(shortUrl) {
+            shortUrlLink.href = shortUrl;
+            shortUrlLink.textContent = shortUrl;
+            resultDiv.classList.remove('hidden');
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function showError(error) {
+            errorMessage.textContent = error;
+            errorDiv.classList.remove('hidden');
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        copyBtn.addEventListener('click', async function() {
+            try {
+                await navigator.clipboard.writeText(shortUrlLink.href);
+                
+                copyText.textContent = 'Kopyalandı!';
+                copyIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                `;
+                copyBtn.classList.add('bg-green-500', 'hover:bg-green-600');
+                copyBtn.classList.remove('bg-blue-500', 'hover:bg-blue-600');
+                
+                setTimeout(() => {
+                    copyText.textContent = 'Kopyala';
+                    copyIcon.innerHTML = `
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                    `;
+                    copyBtn.classList.remove('bg-green-500', 'hover:bg-green-600');
+                    copyBtn.classList.add('bg-blue-500', 'hover:bg-blue-600');
+                }, 2000);
+                
+            } catch (err) {
+                showError('Kopyalama başarısız: ' + err.message);
+            }
+        });
+
+        openBtn.addEventListener('click', function() {
+            window.open(shortUrlLink.href, '_blank', 'noopener,noreferrer');
+        });
+
+        window.addEventListener('load', () => {
+            originalUrlInput.focus();
+        });
+    </script>
+</body>
+</html>
